@@ -16,7 +16,6 @@ class TweetDetailView(DetailView):
 
 class TweetListView(ListView):
 
-    print('list view')
     template_name = 'tweets/list_view.html'
     queryset = Tweet.objects.all()
     # print('queryset ', queryset.content)
