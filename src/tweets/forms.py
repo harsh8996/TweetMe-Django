@@ -1,16 +1,15 @@
-from django import forms
+from django.forms import ModelForm,ValidationError
 from .models import Tweet
 
-# class TweetModelForm(forms.ModelForm):
-#     class meta:
-#         model = Tweet
-#         fields = ['user','content']
+class TweetModelForm(ModelForm):
+    class Meta:
+        model = Tweet
+        fields = ['content']
 
-#     def clean_content(self):
-#         content = self.cleaned_data['content']
+    def clean_content(self):
+        content = self.cleaned_data['content']
         
-#         if content == 'abc':
-#             raise forms.ValidationError('not abc')
-#         else:
-#             raise forms.ValidationError('abc')
-
+        if content == '1234':
+            raise ValidationError('not 1234')
+        else:
+            return content
