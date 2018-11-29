@@ -2,28 +2,52 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from .models import Tweet
 from .forms import TweetModelForm
-from django.views.generic import DetailView,ListView,CreateView
-from .mixins import  FormUserNeededMixin
+from django.views.generic import DetailView,ListView,CreateView,UpdateView,DeleteView
+from .mixins import  FormUserNeededMixin,UserOwnerMixin
+from django import  forms,http
+from django.forms.utils import ErrorList
+from django.urls import reverse_lazy
 # Create your views here.
 
 
-class TweetCreateView(LoginRequiredMixin,FormUserNeededMixin,CreateView):
+class TweetCreateView(FormUserNeededMixin,CreateView):
     # queryset = Tweet.objects.all()
     form_class = TweetModelForm
     template_name = 'tweets/create_view.html'
-    success_url = '/tweet/create/'
-    login_url = '/admin/'
-    # def form_valid(self,form):
-    #     if self.request.user.is_authenticated():
-    #         form.instance.user = self.request.user
-    #         return super(TweetCreateView,self).form_valid(form)
-    #     else:
-    #         return self.form_invalid(form)
+    # success_url = '/tweet/create/'
+    # login_url = '/admin/'
+
+
+
+class TweetUpdateView(LoginRequiredMixin,UserOwnerMixin,UpdateView):
+    queryset = Tweet.objects.all()
+    form_class = TweetModelForm
+    template_name = 'tweets/update_view.html'
+    # success_url = '/tweet/'
+
+class  TweetDeleteView(LoginRequiredMixin,UserOwnerMixin,DeleteView):
+    model = Tweet
+    # form_class = TweetModelForm
+    template_name = 'tweets/delete_confirm.html'
+    success_url = reverse_lazy('tweet:create')
+
+    def delete(self, request, *args, **kwargs):
+        # the Post object
+        self.object = self.get_object()
+        if self.object.user == request.user:
+            success_url = self.get_success_url()
+            self.object.delete()
+            return http.HttpResponseRedirect(success_url)
+        else:
+            # form._errors[forms.forms.NON_FIELD_ERRORS] = ErrorList(["not authorized"])
+            return http.HttpResponseForbidden("Cannot delete other's tweet")
+
 
 class TweetDetailView(DetailView):
 
     template_name = 'tweets/detail_view.html'
     queryset = Tweet.objects.all()
+
     # def get_object(self):
 
     #     id = self.kwargs.get('id')

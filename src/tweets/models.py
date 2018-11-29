@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from .validators import validate_content
+from  django.urls import reverse
 # Create your models here.
 
 # def  check_content(value):
@@ -23,3 +24,6 @@ class Tweet(models.Model):
         if content == '12345':
             raise ValidationError('not 12345')
         return super(Tweet,self).clean()
+
+    def get_absolute_url(self):
+        return reverse('tweet:detail',kwargs={'pk':self.pk})
