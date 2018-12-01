@@ -7,6 +7,7 @@ from .mixins import  FormUserNeededMixin,UserOwnerMixin
 from django import  forms,http
 from django.forms.utils import ErrorList
 from django.urls import reverse_lazy
+from django.db.models import Q
 # Create your views here.
 
 
@@ -57,8 +58,17 @@ class TweetDetailView(DetailView):
 class TweetListView(ListView):
 
     template_name = 'tweets/list_view.html'
-    queryset = Tweet.objects.all()
-    # print('queryset ', queryset.content)
+    # queryset = Tweet.objects.all()
+    def get_queryset(self,*args,**kwargs):
+        data = Tweet.objects.all()
+        serach_tweet = self.request.GET.get('q',None)
+        if serach_tweet is not None:
+            data = data.filter(
+                Q(content__icontains =serach_tweet)|
+                Q(user__username =serach_tweet)
+            )
+        return data 
+
 
     def get_context_data(self,*args,**kwargs):
         context = super(TweetListView,self).get_context_data(*args,**kwargs)
